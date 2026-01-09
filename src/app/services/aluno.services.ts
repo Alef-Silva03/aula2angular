@@ -5,7 +5,7 @@ import { Aluno } from '../models/aluno.model';
 /* O que é um service? 
 é como um garçom que gerencia os dados
 entrega dados para os componentes quando prcisam
-
+S
 */
 
 @Injectable({
@@ -14,17 +14,36 @@ entrega dados para os componentes quando prcisam
 export class AlunoServices {
   private alunosSignal = signal<Aluno[]>([...ALUNOS_MOCK]);
 
-  // Método para obter a lista dos alunos
-  obterAlunos(){
+  // GERAR ID AUTOMÁTICO
+  private gerarProximoId(): number {
+    const alunos = this.alunosSignal();
+    if (alunos.length === 0) return 1;
+    return Math.max(...alunos.map(a => a.id)) + 1;
+  }
+
+  adicionarAluno(novoAluno: Aluno): void {
+    // Criar cópia do aluno com ID automático
+    const alunoComId = new Aluno(
+      this.gerarProximoId(),    // ID automático
+      novoAluno.nome,
+      novoAluno.sexo,
+      novoAluno.foto,
+      novoAluno.disciplina,
+      novoAluno.nota1,
+      novoAluno.nota2
+    );
+    
+    // ✅ AGORA SIM: processarNotas() existe!
+    alunoComId.processarNotas();
+    
+    this.alunosSignal.update(alunos => [...alunos, alunoComId]);
+  }
+
+  obterAlunos() {
     return this.alunosSignal.asReadonly();
   }
 
-  // Método para obter a lista dos alunos
-
-  // Método para adicionar novo aluno
-
-  // Método para atualizar a lista de alunos
-  
-  // Método para buscar aluno por id
-
+  obterAlunoPorId(id: number): Aluno | undefined {
+    return this.alunosSignal().find(aluno => aluno.id === id);
+  }
 }
